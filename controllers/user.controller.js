@@ -1,6 +1,6 @@
 const UserService = require('../services/user.service')
 
-const AddUser = async (req, res) => {
+const RegisterUser = async (req, res) => {
     try {
         const {
             username,
@@ -9,16 +9,28 @@ const AddUser = async (req, res) => {
             email,
             password,
             language,
-            userType
+            country,
+            userType,
+            organizations
         } = req.body
 
-        const existing_user = await UserService.FindOne({
+        const existing_username = await UserService.FindOne({
             username
         })
 
-        if(existing_user){
+        const existing_email = await UserService.FindOne({
+            email
+        })
+
+        if(existing_username){
             return  res.status(409).json({
-                message: 'Data exists'
+                message: 'Username exists'
+            })
+        }
+
+        if(existing_email){
+            return  res.status(409).json({
+                message: 'Email exists'
             })
         }
 
@@ -29,7 +41,9 @@ const AddUser = async (req, res) => {
             email,
             password,
             language,
-            userType
+            country,
+            userType,
+            organizations
         })
 
         return res.status(200).json({
@@ -78,6 +92,24 @@ const GetUserById = async (req, res) => {
     }
 }
 
+const GetUserByType = async (req, res) => {
+    try {
+        const { user_type } = req.params
+        const users = await UserService.Find({
+            userType: user_type
+        })
+
+        return res.status(200).json(
+            {
+                message: 'Users fetched',
+                data: users,
+            }
+        )
+    }catch (e) {
+        console.log('error: ', e)
+    }
+}
+
 const UpdateUser = async (req, res) => {
     try {
         const { _id } = req.params
@@ -88,7 +120,8 @@ const UpdateUser = async (req, res) => {
             email,
             password,
             language,
-            userType
+            userType,
+            organizations
         } = req.body
 
         const user = await UserService.FindOne({
@@ -110,7 +143,8 @@ const UpdateUser = async (req, res) => {
                 email,
                 password,
                 language,
-                userType
+                userType,
+                organizations
             }
         )
 
@@ -153,10 +187,30 @@ const DeleteUser = async (req, res) => {
     }
 }
 
+const GetOrganizationsByUser = async (req, res) => {
+    const { user_id } = req.params
+    try {
+        const organizations = await UserService.FIndOneAndPopulate(
+            {_id: user_id},
+            "organizations"
+        )
+        return res.status(200).json(
+            {
+                message: 'Organizations fetched',
+                data: organizations
+            }
+        )
+    }catch (e) {
+        console.log('error: ', e)
+    }
+}
+
 module.exports = {
-    AddUser,
+    RegisterUser,
     GetAllUsers,
     GetUserById,
+    GetUserByType,
     UpdateUser,
-    DeleteUser
+    DeleteUser,
+    GetOrganizationsByUser
 }

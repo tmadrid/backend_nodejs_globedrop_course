@@ -47,10 +47,22 @@ const DeleteOne = async (filter) => {
     }
 }
 
+const FIndOneAndPopulate = async (query, populate_fields) => {
+    try{
+        const organization = await Organization.findOne(query).populate(populate_fields)
+        const admins = organization.admins
+        return admins
+
+    }catch (e) {
+        console.log('error: ', e)
+    }
+}
+
 module.exports = {
     Create,
     Find,
     FindOne,
     FindOneAndUpdate,
-    DeleteOne
+    DeleteOne,
+    FIndOneAndPopulate
 }

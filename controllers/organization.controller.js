@@ -7,7 +7,8 @@ const AddOrganization = async (req, res) => {
             org_description,
             country,
             city,
-            picture
+            picture,
+            admins
         } = req.body
 
         const existing_organization = await OrganizationService.FindOne({
@@ -25,7 +26,8 @@ const AddOrganization = async (req, res) => {
             org_description,
             country,
             city,
-            picture
+            picture,
+            admins
         })
 
         return res.status(200).json({
@@ -82,7 +84,8 @@ const UpdateOrganization = async (req, res) => {
             org_description,
             country,
             city,
-            picture
+            picture,
+            admins
         } = req.body
 
         const organization = await OrganizationService.FindOne({
@@ -102,7 +105,8 @@ const UpdateOrganization = async (req, res) => {
                 org_description,
                 country,
                 city,
-                picture
+                picture,
+                admins
             }
         )
 
@@ -132,7 +136,7 @@ const DeleteOrganization = async (req, res) => {
             })
         }
 
-       await OrganizationService.DeleteOne({
+        await OrganizationService.DeleteOne({
             _id
         })
         return res.status(200).json(
@@ -145,10 +149,29 @@ const DeleteOrganization = async (req, res) => {
     }
 }
 
+const GetAdminsByOrganization = async (req, res) => {
+    const { organization_id } = req.params
+    try {
+        const admins = await OrganizationService.FIndOneAndPopulate(
+            {_id: organization_id},
+            "admins"
+        )
+        return res.status(200).json(
+            {
+                message: 'Admins fetched',
+                data: admins
+            }
+        )
+    }catch (e) {
+        console.log('error: ', e)
+    }
+}
+
 module.exports = {
     AddOrganization,
     GetAllOrganizations,
     GetOrganizationById,
     UpdateOrganization,
-    DeleteOrganization
+    DeleteOrganization,
+    GetAdminsByOrganization
 }
