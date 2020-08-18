@@ -5,7 +5,9 @@ const OrganizationSchema = new mongoose.Schema({
     org_description: String,
     country: String,
     city: String,
-    picture: String
+    picture: String,
+    createdAt: { type: Date, default: Date.now },
+    updateAt: { type: Date, default: Date.now }
 })
 
 const Organization = mongoose.model(
