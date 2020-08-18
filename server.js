@@ -13,7 +13,8 @@ app.get("/", (req, res) =>{
 
 //routes
 const organization = require('./routes/organization.route')
-app.use(organization)
+const user = require('./routes/user.route')
+app.use(organization, user)
 
 app.listen(port, () => {
     console.log('Server running at: ', port)
