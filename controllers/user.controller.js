@@ -1,4 +1,7 @@
 const UserService = require('../services/user.service')
+const TokenService = require('../services/token.service')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const RegisterUser = async (req, res) => {
     try {
@@ -60,7 +63,7 @@ const GetAllUsers = async (req, res) => {
     try {
         const users = await UserService.Find()
         return res.status(200).json({
-            message: 'All organizations',
+            message: 'All users',
             data: users,
         })
     }catch (e) {
@@ -174,7 +177,7 @@ const DeleteUser = async (req, res) => {
             })
         }
 
-       await UserService.DeleteOne({
+        await UserService.DeleteOne({
             _id
         })
         return res.status(200).json(
@@ -205,6 +208,59 @@ const GetOrganizationsByUser = async (req, res) => {
     }
 }
 
+const Login = async (req, res) => {
+    try {
+        const {
+            email,
+            password
+        } = req.body
+        const user = await  UserService.FindOne({email})
+
+        if(!user){
+            return res.status(400).json({
+                message: 'Invalid email or password'
+            })
+        }
+
+        const valid = user.password && (await bcrypt.compare(password, user.password))
+
+        if(!valid){
+            return res.status(400).json({
+                message: 'Invalid email or password'
+            })
+        }
+
+        const access_token = jwt.sign(user.toJSON(), 'secret_key', {
+            expiresIn: '24h'
+        })
+
+        await TokenService.Create({access_token})
+        return res.status(200).json(
+            {
+                message: 'User authenticated',
+                access_token,
+            }
+        )
+
+    }catch (e) {
+        console.log('error: ', e)
+    }
+}
+
+const Logout = async (req, res) => {
+    try {
+        const authorization = req.headers.authorization
+        const token = authorization && authorization.startsWith('Bearer') && authorization.slice(7, authorization.length)
+        await Promise.all([TokenService.DeleteOne({access_token:token})])
+        return res.status(200).json(
+            {
+                message: 'User Logged out',
+            }
+        )
+    }catch (e) {
+        console.log('error: ', e)
+    }
+}
 module.exports = {
     RegisterUser,
     GetAllUsers,
@@ -212,5 +268,7 @@ module.exports = {
     GetUserByType,
     UpdateUser,
     DeleteUser,
-    GetOrganizationsByUser
+    GetOrganizationsByUser,
+    Login,
+    Logout
 }

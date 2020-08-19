@@ -9,6 +9,8 @@ router.get('/user/:_id', UserController.GetUserById)
 router.put('/user/:_id', UserController.UpdateUser)
 router.delete('/user/:_id', UserController.DeleteUser)
 router.get('/user/:user_id/organizations', UserController.GetOrganizationsByUser)
+router.post('/user/login', UserController.Login)
+router.post('/user/logout', UserController.Logout)
 
 module.exports = router
 
