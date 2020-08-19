@@ -1,7 +1,9 @@
 const express = require('express')
 const OrganizationController = require('../controllers/organization.controller')
+const { isAuthenticated } = require('../utils/middleware')
 const router = express.Router()
 
+router.use(isAuthenticated)
 router.post('/organization', OrganizationController.AddOrganization)
 router.get('/organizations', OrganizationController.GetAllOrganizations)
 router.get('/organization/:_id', OrganizationController.GetOrganizationById)
